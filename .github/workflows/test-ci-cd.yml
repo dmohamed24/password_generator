@@ -1,0 +1,52 @@
+name: Test ENV CI-CD
+
+on:
+  push:
+    branches: ['main']
+    # workflow_dispatch:
+
+jobs:
+  Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: checkout@actionsv4
+      - uses: setupnode@actinos
+      - run: npm run ci
+      - name: run test
+        run: npm run test
+
+  Styling_security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm run ci
+      - name: Run formating and linting checks and code security check
+        run: |
+          npm run check-format
+          npm run lint
+
+  test_preview:
+    needs: [Tests, Styling_security]
+    runs-on: ubuntu-latest
+    steps:
+      - name: DOCKER - Login, build and push to hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{secrets.DOCKER_USERNAME}} --password-stdin
+          docker build . --target:production -t ${{secrets.DOCKER_USERNAME}}/password-generator-app:${{github.sha}}
+          docker push  ${{secrets.DOCKER_USERNAME}}/password-generator-app:${{github.sha}}
+
+      - name: SSH into EC2 and run docker image
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{secrets.EC2_HOST}}
+          username: ${{secrets.EC2_USERNAME}}
+          key: ${{secrets.EC2_KEY}}
+          script: |
+            sudo yum update -y
+            sudo yum install -y docker
+            sudo service docker start
+            sudo docker stop password-generator-app || true
+            sudo docker start password-generator-app || true
+            sudo docker pull ${{secrets.DOCKER_USERNAME}}/password-generator-app:${{github.sha}}
+            sudo docker run --name password-generator-app -d -p 3000:3000 ${{secrets.DOCKER_USERNAME}}/password-generator-app:${{github.sha}}

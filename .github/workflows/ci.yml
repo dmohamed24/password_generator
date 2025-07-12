@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+    branches: ['main']
+
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm run ci
+      - name: Run tests
+        run: npm run test
+
+  Styling:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm run check-format
+      - name: Check eslint and prettier format and eslint security code
+        run: npm run lint
