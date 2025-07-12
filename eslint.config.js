@@ -2,12 +2,12 @@
 const eslint = require('@eslint/js');
 const prettier = require('eslint-config-prettier');
 const prettierPlugin = require('eslint-plugin-prettier');
+const securityPlugin = require('eslint-plugin-security');
 const globals = require('globals');
 
 module.exports = [
-  // Only apply config to src files (remove base recommended config)
   {
-    files: ['src/**/*.js'], // Double-check this path matches your project
+    files: ['src/**/*.js'],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -15,13 +15,14 @@ module.exports = [
     },
     plugins: {
       prettier: prettierPlugin,
+      security: securityPlugin,
     },
     rules: {
-      ...eslint.configs.recommended.rules, // Include recommended rules here
+      ...eslint.configs.recommended.rules,
       ...prettier.rules,
       'prettier/prettier': 'error',
       'no-console': 'warn',
-      // 'no-unused-vars': 'warn',
+      ...securityPlugin.configs.recommended.rules,
     },
   },
 ];
