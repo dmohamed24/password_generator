@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Password Generator</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      input,
+      button {
+        padding: 10px;
+        margin: 5px 0;
+      }
+      .password-item {
+        margin: 5px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Strong Password Generator</h2>
+    <input id="account" placeholder="Enter account/website" />
+    <button id="generate">Generate and Save</button>
+    <div id="saved"></div>
+    <script>
+      let savedPasswords = JSON.parse(localStorage.getItem('saved') || '[]');
+      function display() {
+        const savedDiv = document.getElementById('saved');
+        savedDiv.innerHTML = '';
+        savedPasswords.forEach((entry) => {
+          const div = document.createElement('div');
+          div.className = 'password-item';
+          const passSpan = document.createElement('span');
+          passSpan.textContent = '••••••';
+          const eyeButton = document.createElement('button');
+          eyeButton.textContent = '👁️';
+          eyeButton.onclick = () =>
+            (passSpan.textContent =
+              passSpan.textContent === '••••••' ? entry.password : '••••••');
+          const deleteButton = document.createElement('button');
+          deleteButton.textContent = '🗑️';
+          deleteButton.onclick = () => {
+            savedPasswords = savedPasswords.filter(
+              (item) => item.key !== entry.key
+            );
+            localStorage.setItem('saved', JSON.stringify(savedPasswords));
+            display();
+          };
+          div.append(`${entry.account}: `, passSpan, eyeButton, deleteButton);
+          savedDiv.appendChild(div);
+        });
+      }
+      document.getElementById('generate').onclick = async () => {
+        const account = document.getElementById('account').value;
+        if (!account) return alert('Enter an account!');
+        const res = await fetch('/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ account }),
+        });
+        const data = await res.json();
+        savedPasswords.push({ ...data, key: Date.now() });
+        localStorage.setItem('saved', JSON.stringify(savedPasswords));
+        display();
+      };
+      display();
+    </script>
+  </body>
+</html>

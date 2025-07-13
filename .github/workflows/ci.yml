@@ -5,24 +5,26 @@ on:
     branches: ['main']
 
 jobs:
-  Test:
+  Tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm run ci
+      - run: npm ci
       - name: Run tests
         run: npm run test
 
-  Styling:
+  Styling_and_security:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm run check-format
+      - run: npm ci
       - name: Check eslint and prettier format and eslint security code
-        run: npm run lint
+        run: |
+          npm run check-format
+          npm run lint
