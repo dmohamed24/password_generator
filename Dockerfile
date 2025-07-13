@@ -14,7 +14,8 @@ CMD ["npm", "run", "dev"]
 FROM base AS production
 ENV NODE_ENV=production
 RUN npm ci --only=production
-COPY --chown=node:node src public ./
+COPY --chown=node:node public ./public
+COPY --chown=node:node src ./src
 USER node
 EXPOSE 3000
 CMD ["node", "index.js"]

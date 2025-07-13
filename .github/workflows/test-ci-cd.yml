@@ -54,3 +54,4 @@ jobs:
             sudo docker rm app || true
             sudo docker pull ${{secrets.DOCKER_USERNAME}}/password-generator-app:TEST-${{github.sha}}
             sudo docker run --name app -d -p 3000:3000 ${{secrets.DOCKER_USERNAME}}/password-generator-app:TEST-${{github.sha}}
+            sudo echo "🚀 Preview available at: http://${{ secrets.EC2_HOST }}:3000"
