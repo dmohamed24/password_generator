@@ -19,7 +19,7 @@ describe('Express App', () => {
         .post('/generate')
         .send({ account: 'test' });
       expect(response.statusCode).toBe(200);
-      expect(response.body).toHaveProperty('account', 'testS');
+      expect(response.body).toHaveProperty('account', 'test');
       expect(response.body).toHaveProperty('password');
       expect(response.body.password.length).toBeGreaterThan(10);
     });
