@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm run ci
+      - run: npm ci
       - name: Run tests
         run: npm run test
 
@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm run ci
+      - run: npm ci
       - name: Run formating and linting checks and code security check
         run: |
           npm run check-format

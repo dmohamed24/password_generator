@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.post('/generate', (req, res) => {
-  const { account, test } = req.body;
+  const { account } = req.body;
   const password = crypto.randomBytes(12).toString('hex');
   res.json({ account, password });
 });
