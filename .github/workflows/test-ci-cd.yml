@@ -3,23 +3,26 @@ name: Test ENV CI-CD
 on:
   push:
     branches: ['main']
-    # workflow_dispatch:
 
 jobs:
   Tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: checkout@actionsv4
-      - uses: setupnode@actinos
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
       - run: npm run ci
-      - name: run test
+      - name: Run tests
         run: npm run test
 
-  Styling_security:
+  Styling_and_security:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
+        with:
+          node-version: 20
       - run: npm run ci
       - name: Run formating and linting checks and code security check
         run: |
@@ -27,14 +30,15 @@ jobs:
           npm run lint
 
   test_preview:
-    needs: [Tests, Styling_security]
+    needs: [Tests, Styling_and_security]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: DOCKER - Login, build and push to hub
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{secrets.DOCKER_USERNAME}} --password-stdin
-          docker build . --target:production -t ${{secrets.DOCKER_USERNAME}}/password-generator-app:${{github.sha}}
-          docker push  ${{secrets.DOCKER_USERNAME}}/password-generator-app:${{github.sha}}
+          docker build . --target=production -t ${{secrets.DOCKER_USERNAME}}/password-generator-app:TEST-${{github.sha}}
+          docker push  ${{secrets.DOCKER_USERNAME}}/password-generator-app:TEST-${{github.sha}}
 
       - name: SSH into EC2 and run docker image
         uses: appleboy/ssh-action@v0.1.10
@@ -44,9 +48,9 @@ jobs:
           key: ${{secrets.EC2_KEY}}
           script: |
             sudo yum update -y
-            sudo yum install -y docker
+            sudo install -y docker
             sudo service docker start
-            sudo docker stop password-generator-app || true
-            sudo docker start password-generator-app || true
-            sudo docker pull ${{secrets.DOCKER_USERNAME}}/password-generator-app:${{github.sha}}
-            sudo docker run --name password-generator-app -d -p 3000:3000 ${{secrets.DOCKER_USERNAME}}/password-generator-app:${{github.sha}}
+            sudo docker stop app || true
+            sudo docker rm app || true
+            sudo docker pull ${{secrets.DOCKER_USERNAME}}/password-generator-app:TEST-${{github.sha}}
+            sudo docker run --name app -d -p 3000:3000 ${{secrets.DOCKER_USERNAME}}/password-generator-app:TEST-${{github.sha}}
