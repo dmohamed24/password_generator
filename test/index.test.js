@@ -43,6 +43,6 @@ describe('Express App', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body.account).toBe('demo');
-    expect(response.body.password.length).toBe(10);
+    expect(response.body.password.length).toBe(20);
   });
 });
