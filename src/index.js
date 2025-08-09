@@ -9,8 +9,17 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.post('/generate', (req, res) => {
-  const { account } = req.body;
-  const password = crypto.randomBytes(12).toString('hex');
+  const { account, length = 12, symbols = false } = req.body;
+
+  const base = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const extra = '!@#$%^&*()_+[]{}<>?,.';
+  const chars = base + (symbols ? extra : '');
+
+  let password = '';
+  for (let i = 0; i < Math.min(length, 100); i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
   res.json({ account, password });
 });
 
