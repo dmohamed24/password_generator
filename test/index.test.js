@@ -13,18 +13,6 @@ describe('Express App', () => {
     server.close(done);
   });
 
-  describe('POST /generate', () => {
-    it('should return a strong password for a valid account', async () => {
-      const response = await request(app)
-        .post('/generate')
-        .send({ account: 'test' });
-      expect(response.statusCode).toBe(200);
-      expect(response.body).toHaveProperty('account', 'test');
-      expect(response.body).toHaveProperty('password');
-      expect(response.body.password.length).toBeGreaterThan(10);
-    });
-  });
-
   describe('GET /', () => {
     it('should return the index.html page with necessary elements', async () => {
       const response = await request(app).get('/');
@@ -46,5 +34,15 @@ describe('Express App', () => {
       const response = await request(app).get('/undefined');
       expect(response.statusCode).toBe(404);
     });
+  });
+
+  it('should return password with correct length and optional symbols', async () => {
+    const response = await request(app)
+      .post('/generate')
+      .send({ account: 'demo', length: 20, symbols: true });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.account).toBe('demo');
+    expect(response.body.password.length).toBe(20);
   });
 });

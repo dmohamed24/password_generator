@@ -18,28 +18,55 @@
         align-items: center;
         justify-content: space-between;
       }
+      label {
+        display: block;
+        margin: 10px 0 5px;
+      }
     </style>
   </head>
   <body>
     <h2>Strong Password Generator</h2>
-    <input id="account" placeholder="Enter account/website" />
+
+    <label>
+      Account/Website:
+      <input id="account" placeholder="Enter account/website" />
+    </label>
+
+    <label>
+      Password Length:
+      <input id="length" type="number" min="4" max="100" value="12" />
+    </label>
+
+    <label>
+      <input id="symbols" type="checkbox" />
+      Include symbols (!@#$...)
+    </label>
+
     <button id="generate">Generate and Save</button>
+
+    <h3>Saved Passwords</h3>
     <div id="saved"></div>
+
     <script>
       let savedPasswords = JSON.parse(localStorage.getItem('saved') || '[]');
+
       function display() {
         const savedDiv = document.getElementById('saved');
         savedDiv.innerHTML = '';
         savedPasswords.forEach((entry) => {
           const div = document.createElement('div');
           div.className = 'password-item';
+
           const passSpan = document.createElement('span');
           passSpan.textContent = '••••••';
+
           const eyeButton = document.createElement('button');
           eyeButton.textContent = '👁️';
-          eyeButton.onclick = () =>
-            (passSpan.textContent =
-              passSpan.textContent === '••••••' ? entry.password : '••••••');
+          eyeButton.onclick = () => {
+            passSpan.textContent =
+              passSpan.textContent === '••••••' ? entry.password : '••••••';
+          };
+
           const deleteButton = document.createElement('button');
           deleteButton.textContent = '🗑️';
           deleteButton.onclick = () => {
@@ -49,23 +76,41 @@
             localStorage.setItem('saved', JSON.stringify(savedPasswords));
             display();
           };
+
           div.append(`${entry.account}: `, passSpan, eyeButton, deleteButton);
           savedDiv.appendChild(div);
         });
       }
+
       document.getElementById('generate').onclick = async () => {
-        const account = document.getElementById('account').value;
+        const accountEl = document.getElementById('account');
+        const lengthEl = document.getElementById('length');
+        const symbolsEl = document.getElementById('symbols');
+
+        const account = accountEl.value;
+        const length = parseInt(lengthEl.value, 10);
+        const symbols = symbolsEl.checked;
+
         if (!account) return alert('Enter an account!');
+        if (length < 4 || length > 100)
+          return alert('Length must be between 4 and 100');
+
         const res = await fetch('/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ account }),
+          body: JSON.stringify({ account, length, symbols }),
         });
+
         const data = await res.json();
         savedPasswords.push({ ...data, key: Date.now() });
         localStorage.setItem('saved', JSON.stringify(savedPasswords));
         display();
+
+        accountEl.value = '';
+        lengthEl.value = 12;
+        symbolsEl.checked = false;
       };
+
       display();
     </script>
   </body>
