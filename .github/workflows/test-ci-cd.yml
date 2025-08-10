@@ -41,17 +41,13 @@ jobs:
           docker build . --target=production -t ${{secrets.DOCKER_USERNAME}}/password-generator-app:TEST-${{github.sha}}
           docker push  ${{secrets.DOCKER_USERNAME}}/password-generator-app:TEST-${{github.sha}}
 
-      - name: SSH into EC2 and run docker image
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{secrets.EC2_HOST}}
-          username: ${{secrets.EC2_USERNAME}}
-          key: ${{secrets.EC2_KEY}}
-          script: |
-            sudo yum update -y
-            sudo install -y docker
-            sudo service docker start
-            sudo docker stop app || true
-            sudo docker rm app || true
-            sudo docker pull ${{secrets.DOCKER_USERNAME}}/password-generator-app:TEST-${{github.sha}}
-            sudo docker run --name app -d -p 3000:3000 ${{secrets.DOCKER_USERNAME}}/password-generator-app:TEST-${{github.sha}}
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform – Init & Apply
+        working-directory: ./terraform
+        run: |
+          terraform init
+          terraform plan
+          terraform apply -auto-approve -target=aws_autoscaling_group.asg
+        env:
+          TF_VAR_docker_username: ${{ secrets.DOCKER_USERNAME }}
+          TF_VAR_github_sha: ${{ github.sha }}
