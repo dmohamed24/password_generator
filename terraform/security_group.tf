@@ -56,26 +56,14 @@ resource "aws_vpc_security_group_ingress_rule" "allow_http_alb" {
 
 
 resource "aws_vpc_security_group_ingress_rule" "allow_port_3000" {
-  security_group_id = aws_security_group.ec2_sg.id
-  cidr_ipv4         = aws_vpc.main_vpc.cidr_block
-  from_port         = 3000
-  ip_protocol       = "tcp"
-  to_port           = 3000
+  security_group_id        = aws_security_group.ec2_sg.id
+  from_port                = 3000
+  to_port                  = 3000
+  ip_protocol              = "tcp"
+  referenced_security_group_id = aws_security_group.alb_sg.id
 
   tags = {
     Name = "allow_port_3000"
-  }
-}
-
-resource "aws_vpc_security_group_ingress_rule" "allow_3000_alb" {
-  security_group_id = aws_security_group.alb_sg.id
-  cidr_ipv4         = "0.0.0.0/0"
-  from_port         = 3000
-  ip_protocol       = "tcp"
-  to_port           = 3000
-
-  tags = {
-    Name = "allow_3000_alb"
   }
 }
 
