@@ -15,6 +15,7 @@ resource "aws_launch_template" "asg_template" {
         sudo docker stop app || true
         sudo docker rm app || true
         sudo docker pull ${var.docker_username}/password-generator-app:TEST-${var.github_sha}
+        sudo docker run -d --name app -p 80:3000 ${var.docker_username}/password-generator-app:TEST-${var.github_sha}
       EOF
   )
 
