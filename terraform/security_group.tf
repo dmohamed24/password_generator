@@ -32,10 +32,11 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ssh" {
 
 resource "aws_vpc_security_group_ingress_rule" "allow_http" {
   security_group_id = aws_security_group.ec2_sg.id
-  cidr_ipv4         = aws_vpc.main_vpc.cidr_block
-  from_port         = 80
-  ip_protocol       = "tcp"
-  to_port           = 80
+  # cidr_ipv4         = aws_vpc.main_vpc.cidr_block
+  referenced_security_group_id = aws_security_group.alb_sg.id
+  from_port                    = 80
+  ip_protocol                  = "tcp"
+  to_port                      = 80
 
   tags = {
     Name = "allow_http"
@@ -56,10 +57,10 @@ resource "aws_vpc_security_group_ingress_rule" "allow_http_alb" {
 
 
 resource "aws_vpc_security_group_ingress_rule" "allow_port_3000" {
-  security_group_id        = aws_security_group.ec2_sg.id
-  from_port                = 3000
-  to_port                  = 3000
-  ip_protocol              = "tcp"
+  security_group_id            = aws_security_group.ec2_sg.id
+  from_port                    = 3000
+  to_port                      = 3000
+  ip_protocol                  = "tcp"
   referenced_security_group_id = aws_security_group.alb_sg.id
 
   tags = {
