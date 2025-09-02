@@ -48,13 +48,24 @@ jobs:
           terraform init
           terraform plan
           terraform apply -auto-approve
-          echo "Starting instance refresh for ASG: ec2-asg"
-          aws autoscaling start-instance-refresh \
+
+          echo "Starting instance refresh for ASG"
+          REFRESH_ID=$(aws autoscaling start-instance-refresh \
             --auto-scaling-group-name ec2-asg \
-            --preferences MinHealthyPercentage=50
-          echo "Checking refresh status..."
-          aws autoscaling describe-instance-refreshes \
+            --preferences MinHealthyPercentage=50 \
+            --query 'InstanceRefreshId' \
+            --output text)
+
+          echo "Refresh started with ID: $REFRESH_ID"
+          echo "Waiting for refresh to complete..."
+
+          aws autoscaling wait instance-refresh-complete \
             --auto-scaling-group-name ec2-asg
+
+          echo "Deployment complete ✅"
+          aws autoscaling describe-instance-refreshes \
+            --auto-scaling-group-name ec2-asg \
+            --instance-refresh-ids $REFRESH_ID
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
