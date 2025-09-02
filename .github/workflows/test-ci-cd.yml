@@ -48,9 +48,13 @@ jobs:
           terraform init
           terraform plan
           terraform apply -auto-approve
-          aws autoscaling start-instance-refresh \
-          --auto-scaling-group-name ec2-asg \
-          --preferences MinHealthyPercentage=50
+          # echo "Starting instance refresh for ASG: ec2-asg"
+          # aws autoscaling start-instance-refresh \
+          #   --auto-scaling-group-name ec2-asg \
+          #   --preferences MinHealthyPercentage=50
+          # echo "Checking refresh status..."
+          # aws autoscaling describe-instance-refreshes \
+          #   --auto-scaling-group-name ec2-asg
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
